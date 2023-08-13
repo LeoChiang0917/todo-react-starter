@@ -1,35 +1,13 @@
-import { Footer, Header, TodoCollection, TodoInput } from 'components';
+import { Footer, Header, TodoCollection, TodoInput, } from 'components';
 import { useEffect } from 'react';
-import { getTodos } from '../api/todo';
+import { createTodo, getTodos, patchTodo, deleteTodo } from '../api/todo';
 import { useState } from 'react';
-const dummyTodos = [
-  {
-    title: 'Learn react-router',
-    isDone: true,
-    id: 1,
-  },
-  {
-    title: 'Learn to create custom hooks',
-    isDone: false,
-    id: 2,
-  },
-  {
-    title: 'Learn to use context',
-    isDone: true,
-    id: 3,
-  },
-  {
-    title: 'Learn to implement auth',
-    isDone: false,
-    id: 4,
-  },
-];
 
 
 const TodoPage = () => {
 
   const [inputValue,Setinputvalve] = useState('')
-  const [addtodo, setaddtodo] = useState(dummyTodos)
+  const [addtodo, setaddtodo] = useState([])
 
   const sumAddtodo = addtodo.length
 
@@ -37,42 +15,66 @@ const TodoPage = () => {
     Setinputvalve(value);
   };
 
-  const handletodo = (prev) =>{
+  const handletodo = async() =>{
      if (inputValue.length === 0) {
       return;
     }
+    try{const data = await createTodo({
+      title:inputValue,
+      isDone:false
+    });
+
     setaddtodo((prevTodos) => {
       return [
         ...prevTodos,
         {
-          id: Math.random() * 100,
-          title: inputValue,
+          id: data.id,
+          title: data.title,
           isDone: false,
+          isEdit:false
         },
       ];
     });
+  }catch(error){
+    console.error(error)
+  }  
     Setinputvalve('');
   };
 
-  const handleKeydown = (prev) =>{
+  const handleKeydown = async() =>{
      if (inputValue.length === 0) {
       return;
     }
+    try{const data = await createTodo({
+      title:inputValue,
+      isDone:false
+    });
+
     setaddtodo((prevTodos) => {
       return [
         ...prevTodos,
         {
-          id: Math.random() * 100,
-          title: inputValue,
+          id: data.id,
+          title: data.title,
           isDone: false,
+          isEdit:false
         },
       ];
     });
+  }catch(error){
+    console.error(error)
+  }  
     Setinputvalve('');
-  }
+  };
 
-const handleToggleDone = (id) => {
-    setaddtodo((prevTodos) => {
+const handleToggleDone = async(id) => {
+const currentTodo = addtodo.find((todo)=>todo.id===id);
+try{
+   await patchTodo({
+    id,
+    isDone: !currentTodo.isDone,
+   });
+   setaddtodo((prevTodos) => {
       return prevTodos.map((todo) => {
         if (todo.id === id) {
           return {
@@ -83,6 +85,9 @@ const handleToggleDone = (id) => {
         return todo;
       });
     });
+}catch(error){
+  console.error(error)
+}
   };
 
   const handlechangeMode= ({id,isEdit}) =>{
@@ -99,8 +104,13 @@ const handleToggleDone = (id) => {
   
   }
 
-  const handleonSave = ({id,title}) =>{
-    setaddtodo((prev)=>{
+  const handleonSave = async({id,title}) =>{
+  try{
+  await patchTodo({
+    id,
+    title
+   });
+     setaddtodo((prev)=>{
       return prev.map((todo) =>{
         if(todo.id===id){
           return {
@@ -110,16 +120,40 @@ const handleToggleDone = (id) => {
         return todo
       })
     })
+  }catch(error){
+    console.error(error)
   }
 
-const handleDeletItem = (id) =>{
-   setaddtodo((prev)=>{
+    
+  }
+
+const handleDeletItem = async(id) =>{
+   try{
+    await deleteTodo(id)
+     setaddtodo((prev)=>{
     return prev.filter(todo =>
       todo.id !== id
     )
    }
 )
+   }catch(error){
+    console.error(error)
+   } 
 }
+
+useEffect(() =>{
+const getTodoAsync = async () =>{
+  try{
+    const todos = await getTodos()
+    setaddtodo(todos.map((todo)=>({
+      ...todo, isEdit:false
+    })))
+  }catch(error){
+    console.error(error)
+  }
+}
+getTodoAsync();
+}, [])
 
   return (
     <div>
