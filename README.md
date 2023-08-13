@@ -1,6 +1,6 @@
 # Todo List X MVC with React
 
-## Clone the repository: git clone https://github.com/Keely1112/TodoList.git
+### Clone the repository: git clone https://github.com/LeoChiang0917/todo-react-starter.git
 Install dependencies and start the server:
   
   
