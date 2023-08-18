@@ -2,12 +2,15 @@ import { Footer, Header, TodoCollection, TodoInput, } from 'components';
 import { useEffect } from 'react';
 import { createTodo, getTodos, patchTodo, deleteTodo } from '../api/todo';
 import { useState } from 'react';
-
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from 'context/AuthContext';
 
 const TodoPage = () => {
 
   const [inputValue,Setinputvalve] = useState('')
   const [addtodo, setaddtodo] = useState([])
+   const navigate = useNavigate()
+   const{isAuthentic, currentMember} = useAuth()
 
   const sumAddtodo = addtodo.length
 
@@ -155,10 +158,16 @@ const getTodoAsync = async () =>{
 getTodoAsync();
 }, [])
 
+ useEffect(() => {
+    if(!isAuthentic){
+      navigate('/login');
+    }
+  }, [navigate, isAuthentic]);
+
   return (
     <div>
       TodoPage
-      <Header />
+      <Header username={currentMember?.name}/>
       <TodoInput 
       inputValue={inputValue}
       onChange={handleInput}

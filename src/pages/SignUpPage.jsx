@@ -6,12 +6,60 @@ import {
 } from 'components/common/auth.styled';
 import { ACLogoIcon } from 'assets/images';
 import { AuthInput } from 'components';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import { useAuth } from 'context/AuthContext';
+
+
+
 
 const SignUpPage = () => {
 const [username,setusername] = useState('')
 const [email,setemail] = useState('')
 const [password,setpassword] = useState('')
+const navigate = useNavigate()
+const {register, isAuthentic} = useAuth()
+
+const handleClick = async() =>{
+   if (username.length === 0) {
+    return;
+  }
+  if (password.length === 0) {
+    return;
+  }if(email.length===0){
+    return;
+  }
+
+const success = await register({username,password,email});
+if(success){
+     
+      Swal.fire({
+        position: 'top',
+        title: '註冊成功！',
+        timer: 1000,
+        icon: 'success',
+        showConfirmButton: false,
+      }); 
+      
+     return;
+  }
+ Swal.fire({
+        position: 'top',
+        title: '註冊失敗！',
+        timer: 1000,
+        icon: 'error',
+        showConfirmButton: false,
+      }); 
+
+
+}
+useEffect(() =>{
+if(isAuthentic){
+  navigate('/todos')
+}
+
+},[navigate, isAuthentic])
   return (
     <AuthContainer>
       <div>
@@ -47,8 +95,10 @@ const [password,setpassword] = useState('')
         onChange={(passwordInputValue) =>setpassword(passwordInputValue)}
         />
       </AuthInputContainer>
-      <AuthButton>註冊</AuthButton>
+      <AuthButton onClick={handleClick}>註冊</AuthButton>
+      <Link to="/login">
       <AuthLinkText>取消</AuthLinkText>
+      </Link>
     </AuthContainer>
   );
 };
